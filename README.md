@@ -24,7 +24,7 @@ frontend:
 ### Step 3
 
 The order configuration must be stored in `<config directory>/www/sidebar-order.yaml`. You will create this file yourself. All items will be under the root `order:`.
-They will be arra
+They will be arranged in order from top to bottom.
 
 Ex:
 ```yaml
