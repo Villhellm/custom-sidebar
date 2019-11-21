@@ -11,7 +11,7 @@ function rearrange() {
         req.onload = function () {
             var config = YAML.parse(this.responseText);
             for (var i = config.order.length - 1; i >= 0; i--) {
-                move_item(root, config.order[i].item.toLowerCase(), config.order[i].bottom);
+                move_item(root, config.order[i].item.toLowerCase(), config.order[i].bottom, config.order[i].hide);
             }
             clearInterval(hacky_hackerson)
             console.log("Custom Sidebar is loaded");
@@ -36,20 +36,25 @@ function getSidebar() {
     return root;
 }
 
-function move_item(elements, name, after_space) {
-    for (var i = 0; i < elements.children.length; i++) {
-        if (elements.children[i].tagName == "A") {
-            var current = elements.children[i].children[0].getElementsByTagName('span')[0].innerHTML;
-            if (current.toLowerCase().includes(name)) {
-                if (after_space == true) {
-                    elements.insertBefore(elements.children[i], elements.querySelector("div").nextSibling);
-                }
-                else {
-                    elements.insertBefore(elements.children[i], elements.children[0]);
-                }
-            }
+function move_item(elements, name, after_space, hide) {
+  for (var i = 0; i < elements.children.length; i++) {
+    if (elements.children[i].tagName == "A") {
+      var current = elements.children[i].children[0].getElementsByTagName('span')[0].innerHTML;
+      if (current.toLowerCase().includes(name)) {
+        if(hide == true){
+          elements.removeChild(elements.children[i]);
         }
+        else{
+          if (after_space == true) {
+            elements.insertBefore(elements.children[i], elements.querySelector("div").nextSibling);
+          }
+          else {
+            elements.insertBefore(elements.children[i], elements.children[0]);
+          }
+        }
+      }
     }
+  }
 }
 
 function rando(){
