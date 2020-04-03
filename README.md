@@ -45,3 +45,12 @@ order:
 | item | string | **Required** | This is a string that will be checked for in the display name of the sidebar item. It can be a substring such as `developer` instead of `Developer Tools`. It is not case sensitive.
 | bottom | boolean | **Optional** | Setting this option to `true` will group the item with the bottom items (Configuration, Developer Tools, etc) instead of at the top.
 | hide | boolean | **Optional** | Hide item in sidebar.
+
+NOTE: If you are using a language other than English make sure to include both the English word and a second entry with the translated word that is displayed in your browser for the `item: ` portion of the config. This will ensure that the item is moved/hidden regardless of the time at which it is rendered.
+Example: Language Portuguese
+```yaml
+  - item: history
+    hidden: true
+  - item: Histórico
+    hidden: true
+```
