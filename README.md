@@ -30,6 +30,7 @@ Ex:
 ```yaml
 order:
   - item: map
+    hide: true
   - item: developer tools
   - item: overview
   - item: history
@@ -50,7 +51,7 @@ NOTE: If you are using a language other than English make sure to include both t
 Example: Language Portuguese
 ```yaml
   - item: history
-    hidden: true
+    hide: true
   - item: Histórico
-    hidden: true
+    hide: true
 ```
