@@ -47,6 +47,8 @@ order:
 | bottom | boolean | **Optional** | Setting this option to `true` will group the item with the bottom items (Configuration, Developer Tools, etc) instead of at the top.
 | hide | boolean | **Optional** | Hide item in sidebar.
 
+NOTE: Notifications are not part of the same div as the other sidebar items; it is not moveable.
+
 NOTE: If you are using a language other than English make sure to include both the English word and a second entry with the translated word that is displayed in your browser for the `item: ` portion of the config. This will ensure that the item is moved/hidden regardless of the time at which it is rendered.
 Example: Language Portuguese
 ```yaml
