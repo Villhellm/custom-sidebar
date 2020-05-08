@@ -39,6 +39,12 @@ order:
     bottom: true
 ```
 
+## Order
+
+| Name | Type | Requirement | Description
+| ---- | ---- | ------- | -----------
+| order | list([item](#item-options)) | **Required** | List of items you would like to rearrange.
+
 ## Item Options
 
 | Name | Type | Requirement | Description
@@ -46,6 +52,40 @@ order:
 | item | string | **Required** | This is a string that will be checked for in the display name of the sidebar item. It can be a substring such as `developer` instead of `Developer Tools`. It is not case sensitive.
 | bottom | boolean | **Optional** | Setting this option to `true` will group the item with the bottom items (Configuration, Developer Tools, etc) instead of at the top.
 | hide | boolean | **Optional** | Hide item in sidebar.
+
+## Exceptions
+Exceptions can be used if you would like to define an order for a specific user/device.
+
+| Name | Type | Requirement | Description
+| ---- | ---- | ------- | -----------
+| base_order | bool | **Optional** | If true this will run rearrangement for your base order configuration before running this exception. Default is false.
+| user | string | **Optional** | Home Assistant user name you would like to display this order for.
+| device | string | **Optional** | Type of device you would like to display this order for. ex: ipad, iphone, macintosh, windows, android
+| not_user | string | **Optional** | Every Home Assistant user name *except* this user name.
+| not_device | string | **Optional** | Every device *except* this device. ex: ipad, iphone, macintosh, windows, android
+| order | [order](#order) | **Required** | Define and order. 
+
+Ex sidebar-order.yaml using exceptions:
+```yaml
+order:
+  - item: map
+    hide: true
+  - item: developer tools
+  - item: overview
+  - item: history
+    bottom: true
+  - item: logbook
+    bottom: true
+exceptions:
+  - user: will
+    base_order: true
+    order:
+      - item: map
+        hide: false
+      - item: developer_tools
+        hide: true
+
+```
 
 NOTE: Notifications are not part of the same div as the other sidebar items; it is not moveable.
 

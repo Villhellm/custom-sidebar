@@ -1,39 +1,99 @@
 console.log("Custom Sidebar is loading");
 
-var Hacky_Hackerson = setInterval(rearrange, 1000 / 60);
-var Loaded = false; 
+var Hacky_Hackerson = setInterval(run, 1000 / 60);
+var Loaded = false;
+var Haobj = null;
+var Root = null;
 
-function rearrange() {
-    let root = getSidebar();
-    if (root && !Loaded) {
-        Loaded = true;
-        var req = new XMLHttpRequest();
-        req.onload = function () {
-            var config = YAML.parse(this.responseText);
-            for (var i = config.order.length - 1; i >= 0; i--) {
-                moveItem(root, config.order[i].item.toLowerCase(), config.order[i].bottom, config.order[i].hide);
-            }
-            clearInterval(Hacky_Hackerson)
-            console.log("Custom Sidebar is loaded");
-        };
-        req.onerror = function(){
-            clearInterval(Hacky_Hackerson);
-        }
-        req.open('GET', window.location.origin + "/local/sidebar-order.yaml?rnd=" + rando());
-        req.send();
+function Current_Order(config) {
+  var return_order = null;
+  if (config) {
+    if (config.order) {
+      return_order = config.order;
     }
+    if (config.exceptions) {
+      for (var i = 0; i < config.exceptions.length; i++) {
+        var current_exception = config.exceptions[i];
+        var current_environment_enabled = true;
+        var current_exception_keys = Object.keys(current_exception);
+        for (var x = 0; x < current_exception_keys.length; x++) {
+          switch (current_exception_keys[x]) {
+            case "user":
+              if (current_exception.user.toLowerCase() != Haobj.user.name.toLowerCase()) {
+                current_environment_enabled = false;
+              }
+              break;
+            case "device":
+              if (!navigator.userAgent.toLowerCase().includes(current_exception.device.toLowerCase())) {
+                current_environment_enabled = false;
+              }
+              break;
+            case "not_user":
+              if (current_exception.not_user.toLowerCase() == Haobj.user.name.toLowerCase()) {
+                current_environment_enabled = false;
+              }
+              break;
+            case "not_device":
+              if (navigator.userAgent.toLowerCase().includes(current_exception.not_device.toLowerCase())) {
+                current_environment_enabled = false;
+              }
+              break;
+          }
+          if (current_environment_enabled == false) {
+            break;
+          }
+        }
+        if (current_environment_enabled) {
+          if (current_exception.order) {
+            if(current_exception.base_order && return_order){
+              rearrange(return_order);
+            }
+            return_order = current_exception.order;
+          }
+        }
+      }
+    }
+  }
+
+  return return_order;
+}
+
+function rearrange(order){
+  for (var i = order.length - 1; i >= 0; i--) {
+    moveItem(Root, order[i].item.toLowerCase(), order[i].bottom, order[i].hide);
+  }
+}
+
+function run() {
+  Root = getSidebar();
+  if (Root && !Loaded) {
+    Loaded = true;
+    var req = new XMLHttpRequest();
+    req.onload = function () {
+      var order = Current_Order(YAML.parse(this.responseText));
+      rearrange(order);
+      clearInterval(Hacky_Hackerson)
+      console.log("Custom Sidebar is loaded");
+    };
+    req.onerror = function () {
+      clearInterval(Hacky_Hackerson);
+    }
+    req.open('GET', "/local/sidebar-order.yaml?rnd=" + rando());
+    req.send();
+  }
 }
 
 function getSidebar() {
-    let root = document.querySelector("home-assistant");
-    root = root && root.shadowRoot;
-    root = root && root.querySelector("home-assistant-main");
-    root = root && root.shadowRoot;
-    root = root && root.querySelector("app-drawer-layout app-drawer");
-    root = root && root.querySelector("ha-sidebar");
-    root = root && root.shadowRoot;
-    root = root && root.querySelector("paper-listbox");
-    return root;
+  let root = document.querySelector("home-assistant");
+  Haobj = root.hass;
+  root = root && root.shadowRoot;
+  root = root && root.querySelector("home-assistant-main");
+  root = root && root.shadowRoot;
+  root = root && root.querySelector("app-drawer-layout app-drawer");
+  root = root && root.querySelector("ha-sidebar");
+  root = root && root.shadowRoot;
+  root = root && root.querySelector("paper-listbox");
+  return root;
 }
 
 function moveItem(elements, name, after_space, hide) {
@@ -41,10 +101,11 @@ function moveItem(elements, name, after_space, hide) {
     if (elements.children[i].tagName == "A") {
       var current = elements.children[i].children[0].getElementsByTagName('span')[0].innerHTML;
       if (current.toLowerCase().includes(name)) {
-        if(hide == true){
-          elements.removeChild(elements.children[i]);
+        if (hide == true) {
+          elements.children[i].style.display = "none";
         }
-        else{
+        else {
+          elements.children[i].style.display = "block";
           if (after_space == true) {
             elements.insertBefore(elements.children[i], elements.querySelector("div").nextSibling);
           }
@@ -57,24 +118,25 @@ function moveItem(elements, name, after_space, hide) {
   }
 }
 
-function rando(){
-    return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+function rando() {
+  return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
 }
 
 //YAML parser taken from https://github.com/jeremyfa/yaml.js
-(function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
+(function () { function r(e, n, t) { function o(i, f) { if (!n[i]) { if (!e[i]) { var c = "function" == typeof require && require; if (!f && c) return c(i, !0); if (u) return u(i, !0); var a = new Error("Cannot find module '" + i + "'"); throw a.code = "MODULE_NOT_FOUND", a } var p = n[i] = { exports: {} }; e[i][0].call(p.exports, function (r) { var n = e[i][1][r]; return o(n || r) }, p, p.exports, r, e, n, t) } return n[i].exports } for (var u = "function" == typeof require && require, i = 0; i < t.length; i++)o(t[i]); return o } return r })()({
+  1: [function (require, module, exports) {
     var Dumper, Inline, Utils;
-    
+
     Utils = require('./Utils');
-    
+
     Inline = require('./Inline');
-    
-    Dumper = (function() {
-      function Dumper() {}
-    
+
+    Dumper = (function () {
+      function Dumper() { }
+
       Dumper.indentation = 4;
-    
-      Dumper.prototype.dump = function(input, inline, indent, exceptionOnInvalidType, objectEncoder) {
+
+      Dumper.prototype.dump = function (input, inline, indent, exceptionOnInvalidType, objectEncoder) {
         var i, key, len, output, prefix, value, willBeInlined;
         if (inline == null) {
           inline = 0;
@@ -112,29 +174,29 @@ function rando(){
         }
         return output;
       };
-    
+
       return Dumper;
-    
+
     })();
-    
+
     module.exports = Dumper;
-    
-    
-    },{"./Inline":6,"./Utils":10}],2:[function(require,module,exports){
+
+
+  }, { "./Inline": 6, "./Utils": 10 }], 2: [function (require, module, exports) {
     var Escaper, Pattern;
-    
+
     Pattern = require('./Pattern');
-    
-    Escaper = (function() {
+
+    Escaper = (function () {
       var ch;
-    
-      function Escaper() {}
-    
+
+      function Escaper() { }
+
       Escaper.LIST_ESCAPEES = ['\\', '\\\\', '\\"', '"', "\x00", "\x01", "\x02", "\x03", "\x04", "\x05", "\x06", "\x07", "\x08", "\x09", "\x0a", "\x0b", "\x0c", "\x0d", "\x0e", "\x0f", "\x10", "\x11", "\x12", "\x13", "\x14", "\x15", "\x16", "\x17", "\x18", "\x19", "\x1a", "\x1b", "\x1c", "\x1d", "\x1e", "\x1f", (ch = String.fromCharCode)(0x0085), ch(0x00A0), ch(0x2028), ch(0x2029)];
-    
+
       Escaper.LIST_ESCAPED = ['\\\\', '\\"', '\\"', '\\"', "\\0", "\\x01", "\\x02", "\\x03", "\\x04", "\\x05", "\\x06", "\\a", "\\b", "\\t", "\\n", "\\v", "\\f", "\\r", "\\x0e", "\\x0f", "\\x10", "\\x11", "\\x12", "\\x13", "\\x14", "\\x15", "\\x16", "\\x17", "\\x18", "\\x19", "\\x1a", "\\e", "\\x1c", "\\x1d", "\\x1e", "\\x1f", "\\N", "\\_", "\\L", "\\P"];
-    
-      Escaper.MAPPING_ESCAPEES_TO_ESCAPED = (function() {
+
+      Escaper.MAPPING_ESCAPEES_TO_ESCAPED = (function () {
         var i, j, mapping, ref;
         mapping = {};
         for (i = j = 0, ref = Escaper.LIST_ESCAPEES.length; 0 <= ref ? j < ref : j > ref; i = 0 <= ref ? ++j : --j) {
@@ -142,166 +204,166 @@ function rando(){
         }
         return mapping;
       })();
-    
+
       Escaper.PATTERN_CHARACTERS_TO_ESCAPE = new Pattern('[\\x00-\\x1f]|\xc2\x85|\xc2\xa0|\xe2\x80\xa8|\xe2\x80\xa9');
-    
+
       Escaper.PATTERN_MAPPING_ESCAPEES = new Pattern(Escaper.LIST_ESCAPEES.join('|').split('\\').join('\\\\'));
-    
+
       Escaper.PATTERN_SINGLE_QUOTING = new Pattern('[\\s\'":{}[\\],&*#?]|^[-?|<>=!%@`]');
-    
-      Escaper.requiresDoubleQuoting = function(value) {
+
+      Escaper.requiresDoubleQuoting = function (value) {
         return this.PATTERN_CHARACTERS_TO_ESCAPE.test(value);
       };
-    
-      Escaper.escapeWithDoubleQuotes = function(value) {
+
+      Escaper.escapeWithDoubleQuotes = function (value) {
         var result;
-        result = this.PATTERN_MAPPING_ESCAPEES.replace(value, (function(_this) {
-          return function(str) {
+        result = this.PATTERN_MAPPING_ESCAPEES.replace(value, (function (_this) {
+          return function (str) {
             return _this.MAPPING_ESCAPEES_TO_ESCAPED[str];
           };
         })(this));
         return '"' + result + '"';
       };
-    
-      Escaper.requiresSingleQuoting = function(value) {
+
+      Escaper.requiresSingleQuoting = function (value) {
         return this.PATTERN_SINGLE_QUOTING.test(value);
       };
-    
-      Escaper.escapeWithSingleQuotes = function(value) {
+
+      Escaper.escapeWithSingleQuotes = function (value) {
         return "'" + value.replace(/'/g, "''") + "'";
       };
-    
+
       return Escaper;
-    
+
     })();
-    
+
     module.exports = Escaper;
-    
-    
-    },{"./Pattern":8}],3:[function(require,module,exports){
+
+
+  }, { "./Pattern": 8 }], 3: [function (require, module, exports) {
     var DumpException,
-      extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+      extend = function (child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
       hasProp = {}.hasOwnProperty;
-    
-    DumpException = (function(superClass) {
+
+    DumpException = (function (superClass) {
       extend(DumpException, superClass);
-    
+
       function DumpException(message, parsedLine, snippet) {
         DumpException.__super__.constructor.call(this, message);
         this.message = message;
         this.parsedLine = parsedLine;
         this.snippet = snippet;
       }
-    
-      DumpException.prototype.toString = function() {
+
+      DumpException.prototype.toString = function () {
         if ((this.parsedLine != null) && (this.snippet != null)) {
           return '<DumpException> ' + this.message + ' (line ' + this.parsedLine + ': \'' + this.snippet + '\')';
         } else {
           return '<DumpException> ' + this.message;
         }
       };
-    
+
       return DumpException;
-    
+
     })(Error);
-    
+
     module.exports = DumpException;
-    
-    
-    },{}],4:[function(require,module,exports){
+
+
+  }, {}], 4: [function (require, module, exports) {
     var ParseException,
-      extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+      extend = function (child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
       hasProp = {}.hasOwnProperty;
-    
-    ParseException = (function(superClass) {
+
+    ParseException = (function (superClass) {
       extend(ParseException, superClass);
-    
+
       function ParseException(message, parsedLine, snippet) {
         ParseException.__super__.constructor.call(this, message);
         this.message = message;
         this.parsedLine = parsedLine;
         this.snippet = snippet;
       }
-    
-      ParseException.prototype.toString = function() {
+
+      ParseException.prototype.toString = function () {
         if ((this.parsedLine != null) && (this.snippet != null)) {
           return '<ParseException> ' + this.message + ' (line ' + this.parsedLine + ': \'' + this.snippet + '\')';
         } else {
           return '<ParseException> ' + this.message;
         }
       };
-    
+
       return ParseException;
-    
+
     })(Error);
-    
+
     module.exports = ParseException;
-    
-    
-    },{}],5:[function(require,module,exports){
+
+
+  }, {}], 5: [function (require, module, exports) {
     var ParseMore,
-      extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+      extend = function (child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
       hasProp = {}.hasOwnProperty;
-    
-    ParseMore = (function(superClass) {
+
+    ParseMore = (function (superClass) {
       extend(ParseMore, superClass);
-    
+
       function ParseMore(message, parsedLine, snippet) {
         ParseMore.__super__.constructor.call(this, message);
         this.message = message;
         this.parsedLine = parsedLine;
         this.snippet = snippet;
       }
-    
-      ParseMore.prototype.toString = function() {
+
+      ParseMore.prototype.toString = function () {
         if ((this.parsedLine != null) && (this.snippet != null)) {
           return '<ParseMore> ' + this.message + ' (line ' + this.parsedLine + ': \'' + this.snippet + '\')';
         } else {
           return '<ParseMore> ' + this.message;
         }
       };
-    
+
       return ParseMore;
-    
+
     })(Error);
-    
+
     module.exports = ParseMore;
-    
-    
-    },{}],6:[function(require,module,exports){
+
+
+  }, {}], 6: [function (require, module, exports) {
     var DumpException, Escaper, Inline, ParseException, ParseMore, Pattern, Unescaper, Utils,
-      indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
-    
+      indexOf = [].indexOf || function (item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
+
     Pattern = require('./Pattern');
-    
+
     Unescaper = require('./Unescaper');
-    
+
     Escaper = require('./Escaper');
-    
+
     Utils = require('./Utils');
-    
+
     ParseException = require('./Exception/ParseException');
-    
+
     ParseMore = require('./Exception/ParseMore');
-    
+
     DumpException = require('./Exception/DumpException');
-    
-    Inline = (function() {
-      function Inline() {}
-    
+
+    Inline = (function () {
+      function Inline() { }
+
       Inline.REGEX_QUOTED_STRING = '(?:"(?:[^"\\\\]*(?:\\\\.[^"\\\\]*)*)"|\'(?:[^\']*(?:\'\'[^\']*)*)\')';
-    
+
       Inline.PATTERN_TRAILING_COMMENTS = new Pattern('^\\s*#.*$');
-    
+
       Inline.PATTERN_QUOTED_SCALAR = new Pattern('^' + Inline.REGEX_QUOTED_STRING);
-    
+
       Inline.PATTERN_THOUSAND_NUMERIC_SCALAR = new Pattern('^(-|\\+)?[0-9,]+(\\.[0-9]+)?$');
-    
+
       Inline.PATTERN_SCALAR_BY_DELIMITERS = {};
-    
+
       Inline.settings = {};
-    
-      Inline.configure = function(exceptionOnInvalidType, objectDecoder) {
+
+      Inline.configure = function (exceptionOnInvalidType, objectDecoder) {
         if (exceptionOnInvalidType == null) {
           exceptionOnInvalidType = null;
         }
@@ -311,8 +373,8 @@ function rando(){
         this.settings.exceptionOnInvalidType = exceptionOnInvalidType;
         this.settings.objectDecoder = objectDecoder;
       };
-    
-      Inline.parse = function(value, exceptionOnInvalidType, objectDecoder) {
+
+      Inline.parse = function (value, exceptionOnInvalidType, objectDecoder) {
         var context, result;
         if (exceptionOnInvalidType == null) {
           exceptionOnInvalidType = false;
@@ -351,8 +413,8 @@ function rando(){
         }
         return result;
       };
-    
-      Inline.dump = function(value, exceptionOnInvalidType, objectEncoder) {
+
+      Inline.dump = function (value, exceptionOnInvalidType, objectEncoder) {
         var ref, result, type;
         if (exceptionOnInvalidType == null) {
           exceptionOnInvalidType = false;
@@ -404,8 +466,8 @@ function rando(){
         }
         return value;
       };
-    
-      Inline.dumpObject = function(value, exceptionOnInvalidType, objectSupport) {
+
+      Inline.dumpObject = function (value, exceptionOnInvalidType, objectSupport) {
         var j, key, len1, output, val;
         if (objectSupport == null) {
           objectSupport = null;
@@ -426,8 +488,8 @@ function rando(){
           return '{' + output.join(', ') + '}';
         }
       };
-    
-      Inline.parseScalar = function(scalar, delimiters, stringDelimiters, context, evaluate) {
+
+      Inline.parseScalar = function (scalar, delimiters, stringDelimiters, context, evaluate) {
         var i, joinedDelimiters, match, output, pattern, ref, ref1, strpos, tmp;
         if (delimiters == null) {
           delimiters = null;
@@ -487,8 +549,8 @@ function rando(){
         context.i = i;
         return output;
       };
-    
-      Inline.parseQuotedScalar = function(scalar, context) {
+
+      Inline.parseQuotedScalar = function (scalar, context) {
         var i, match, output;
         i = context.i;
         if (!(match = this.PATTERN_QUOTED_SCALAR.exec(scalar.slice(i)))) {
@@ -504,8 +566,8 @@ function rando(){
         context.i = i;
         return output;
       };
-    
-      Inline.parseSequence = function(sequence, context) {
+
+      Inline.parseSequence = function (sequence, context) {
         var e, error, i, isQuoted, len, output, ref, value;
         output = [];
         len = sequence.length;
@@ -546,8 +608,8 @@ function rando(){
         }
         throw new ParseMore('Malformed inline YAML string ' + sequence);
       };
-    
-      Inline.parseMapping = function(mapping, context) {
+
+      Inline.parseMapping = function (mapping, context) {
         var done, i, key, len, output, shouldContinueWhileLoop, value;
         output = {};
         len = mapping.length;
@@ -614,8 +676,8 @@ function rando(){
         }
         throw new ParseMore('Malformed inline YAML string ' + mapping);
       };
-    
-      Inline.evaluateScalar = function(scalar, context) {
+
+      Inline.evaluateScalar = function (scalar, context) {
         var cast, date, exceptionOnInvalidType, firstChar, firstSpace, firstWord, objectDecoder, raw, scalarLower, subValue, trimmedScalar;
         scalar = Utils.trim(scalar);
         scalarLower = scalar.toLowerCase();
@@ -747,62 +809,62 @@ function rando(){
             }
         }
       };
-    
+
       return Inline;
-    
+
     })();
-    
+
     module.exports = Inline;
-    
-    
-    },{"./Escaper":2,"./Exception/DumpException":3,"./Exception/ParseException":4,"./Exception/ParseMore":5,"./Pattern":8,"./Unescaper":9,"./Utils":10}],7:[function(require,module,exports){
+
+
+  }, { "./Escaper": 2, "./Exception/DumpException": 3, "./Exception/ParseException": 4, "./Exception/ParseMore": 5, "./Pattern": 8, "./Unescaper": 9, "./Utils": 10 }], 7: [function (require, module, exports) {
     var Inline, ParseException, ParseMore, Parser, Pattern, Utils;
-    
+
     Inline = require('./Inline');
-    
+
     Pattern = require('./Pattern');
-    
+
     Utils = require('./Utils');
-    
+
     ParseException = require('./Exception/ParseException');
-    
+
     ParseMore = require('./Exception/ParseMore');
-    
-    Parser = (function() {
+
+    Parser = (function () {
       Parser.prototype.PATTERN_FOLDED_SCALAR_ALL = new Pattern('^(?:(?<type>![^\\|>]*)\\s+)?(?<separator>\\||>)(?<modifiers>\\+|\\-|\\d+|\\+\\d+|\\-\\d+|\\d+\\+|\\d+\\-)?(?<comments> +#.*)?$');
-    
+
       Parser.prototype.PATTERN_FOLDED_SCALAR_END = new Pattern('(?<separator>\\||>)(?<modifiers>\\+|\\-|\\d+|\\+\\d+|\\-\\d+|\\d+\\+|\\d+\\-)?(?<comments> +#.*)?$');
-    
+
       Parser.prototype.PATTERN_SEQUENCE_ITEM = new Pattern('^\\-((?<leadspaces>\\s+)(?<value>.+?))?\\s*$');
-    
+
       Parser.prototype.PATTERN_ANCHOR_VALUE = new Pattern('^&(?<ref>[^ ]+) *(?<value>.*)');
-    
+
       Parser.prototype.PATTERN_COMPACT_NOTATION = new Pattern('^(?<key>' + Inline.REGEX_QUOTED_STRING + '|[^ \'"\\{\\[].*?) *\\:(\\s+(?<value>.+?))?\\s*$');
-    
+
       Parser.prototype.PATTERN_MAPPING_ITEM = new Pattern('^(?<key>' + Inline.REGEX_QUOTED_STRING + '|[^ \'"\\[\\{].*?) *\\:(\\s+(?<value>.+?))?\\s*$');
-    
+
       Parser.prototype.PATTERN_DECIMAL = new Pattern('\\d+');
-    
+
       Parser.prototype.PATTERN_INDENT_SPACES = new Pattern('^ +');
-    
+
       Parser.prototype.PATTERN_TRAILING_LINES = new Pattern('(\n*)$');
-    
+
       Parser.prototype.PATTERN_YAML_HEADER = new Pattern('^\\%YAML[: ][\\d\\.]+.*\n', 'm');
-    
+
       Parser.prototype.PATTERN_LEADING_COMMENTS = new Pattern('^(\\#.*?\n)+', 'm');
-    
+
       Parser.prototype.PATTERN_DOCUMENT_MARKER_START = new Pattern('^\\-\\-\\-.*?\n', 'm');
-    
+
       Parser.prototype.PATTERN_DOCUMENT_MARKER_END = new Pattern('^\\.\\.\\.\\s*$', 'm');
-    
+
       Parser.prototype.PATTERN_FOLDED_SCALAR_BY_INDENTATION = {};
-    
+
       Parser.prototype.CONTEXT_NONE = 0;
-    
+
       Parser.prototype.CONTEXT_SEQUENCE = 1;
-    
+
       Parser.prototype.CONTEXT_MAPPING = 2;
-    
+
       function Parser(offset) {
         this.offset = offset != null ? offset : 0;
         this.lines = [];
@@ -810,8 +872,8 @@ function rando(){
         this.currentLine = '';
         this.refs = {};
       }
-    
-      Parser.prototype.parse = function(value, exceptionOnInvalidType, objectDecoder) {
+
+      Parser.prototype.parse = function (value, exceptionOnInvalidType, objectDecoder) {
         var alias, allowOverwrite, block, c, context, data, e, error, error1, error2, first, i, indent, isRef, j, k, key, l, lastKey, len, len1, len2, len3, lineCount, m, matches, mergeNode, n, name, parsed, parsedItem, parser, ref, ref1, ref2, refName, refValue, val, values;
         if (exceptionOnInvalidType == null) {
           exceptionOnInvalidType = false;
@@ -963,7 +1025,7 @@ function rando(){
               values.value = matches.value;
             }
             if (mergeNode) {
-    
+
             } else if (!(values.value != null) || '' === Utils.trim(values.value, ' ') || Utils.ltrim(values.value, ' ').indexOf('#') === 0) {
               if (!(this.isNextLineIndented()) && !(this.isNextLineUnIndentedCollection())) {
                 if (allowOverwrite || data[key] === void 0) {
@@ -1044,16 +1106,16 @@ function rando(){
           return data;
         }
       };
-    
-      Parser.prototype.getRealCurrentLineNb = function() {
+
+      Parser.prototype.getRealCurrentLineNb = function () {
         return this.currentLineNb + this.offset;
       };
-    
-      Parser.prototype.getCurrentLineIndentation = function() {
+
+      Parser.prototype.getCurrentLineIndentation = function () {
         return this.currentLine.length - Utils.ltrim(this.currentLine, ' ').length;
       };
-    
-      Parser.prototype.getNextEmbedBlock = function(indentation, includeUnindentedCollection) {
+
+      Parser.prototype.getNextEmbedBlock = function (indentation, includeUnindentedCollection) {
         var data, indent, isItUnindentedCollection, newIndent, removeComments, removeCommentsPattern, unindentedEmbedBlock;
         if (indentation == null) {
           indentation = null;
@@ -1096,7 +1158,7 @@ function rando(){
           if (indent >= newIndent) {
             data.push(this.currentLine.slice(newIndent));
           } else if (Utils.ltrim(this.currentLine).charAt(0) === '#') {
-    
+
           } else if (0 === indent) {
             this.moveToPreviousLine();
             break;
@@ -1106,20 +1168,20 @@ function rando(){
         }
         return data.join("\n");
       };
-    
-      Parser.prototype.moveToNextLine = function() {
+
+      Parser.prototype.moveToNextLine = function () {
         if (this.currentLineNb >= this.lines.length - 1) {
           return false;
         }
         this.currentLine = this.lines[++this.currentLineNb];
         return true;
       };
-    
-      Parser.prototype.moveToPreviousLine = function() {
+
+      Parser.prototype.moveToPreviousLine = function () {
         this.currentLine = this.lines[--this.currentLineNb];
       };
-    
-      Parser.prototype.parseValue = function(value, exceptionOnInvalidType, objectDecoder) {
+
+      Parser.prototype.parseValue = function (value, exceptionOnInvalidType, objectDecoder) {
         var e, error, foldedIndent, matches, modifiers, pos, ref, ref1, val;
         if (0 === value.indexOf('*')) {
           pos = value.indexOf('#');
@@ -1169,8 +1231,8 @@ function rando(){
           return Inline.parse(value, exceptionOnInvalidType, objectDecoder);
         }
       };
-    
-      Parser.prototype.parseFoldedScalar = function(separator, indicator, indentation) {
+
+      Parser.prototype.parseFoldedScalar = function (separator, indicator, indentation) {
         var isCurrentLineBlank, j, len, line, matches, newText, notEOF, pattern, ref, text;
         if (indicator == null) {
           indicator = '';
@@ -1241,8 +1303,8 @@ function rando(){
         }
         return text;
       };
-    
-      Parser.prototype.isNextLineIndented = function(ignoreComments) {
+
+      Parser.prototype.isNextLineIndented = function (ignoreComments) {
         var EOF, currentIndentation, ret;
         if (ignoreComments == null) {
           ignoreComments = true;
@@ -1268,24 +1330,24 @@ function rando(){
         this.moveToPreviousLine();
         return ret;
       };
-    
-      Parser.prototype.isCurrentLineEmpty = function() {
+
+      Parser.prototype.isCurrentLineEmpty = function () {
         var trimmedLine;
         trimmedLine = Utils.trim(this.currentLine, ' ');
         return trimmedLine.length === 0 || trimmedLine.charAt(0) === '#';
       };
-    
-      Parser.prototype.isCurrentLineBlank = function() {
+
+      Parser.prototype.isCurrentLineBlank = function () {
         return '' === Utils.trim(this.currentLine, ' ');
       };
-    
-      Parser.prototype.isCurrentLineComment = function() {
+
+      Parser.prototype.isCurrentLineComment = function () {
         var ltrimmedLine;
         ltrimmedLine = Utils.ltrim(this.currentLine, ' ');
         return ltrimmedLine.charAt(0) === '#';
       };
-    
-      Parser.prototype.cleanup = function(value) {
+
+      Parser.prototype.cleanup = function (value) {
         var count, i, indent, j, l, len, len1, line, lines, ref, ref1, ref2, smallestIndent, trimmedValue;
         if (value.indexOf("\r") !== -1) {
           value = value.split("\r\n").join("\n").split("\r").join("\n");
@@ -1325,8 +1387,8 @@ function rando(){
         }
         return value;
       };
-    
-      Parser.prototype.isNextLineUnIndentedCollection = function(currentIndentation) {
+
+      Parser.prototype.isNextLineUnIndentedCollection = function (currentIndentation) {
         var notEOF, ret;
         if (currentIndentation == null) {
           currentIndentation = null;
@@ -1348,30 +1410,30 @@ function rando(){
         this.moveToPreviousLine();
         return ret;
       };
-    
-      Parser.prototype.isStringUnIndentedCollectionItem = function() {
+
+      Parser.prototype.isStringUnIndentedCollectionItem = function () {
         return this.currentLine === '-' || this.currentLine.slice(0, 2) === '- ';
       };
-    
+
       return Parser;
-    
+
     })();
-    
+
     module.exports = Parser;
-    
-    
-    },{"./Exception/ParseException":4,"./Exception/ParseMore":5,"./Inline":6,"./Pattern":8,"./Utils":10}],8:[function(require,module,exports){
+
+
+  }, { "./Exception/ParseException": 4, "./Exception/ParseMore": 5, "./Inline": 6, "./Pattern": 8, "./Utils": 10 }], 8: [function (require, module, exports) {
     var Pattern;
-    
-    Pattern = (function() {
+
+    Pattern = (function () {
       Pattern.prototype.regex = null;
-    
+
       Pattern.prototype.rawRegex = null;
-    
+
       Pattern.prototype.cleanedRegex = null;
-    
+
       Pattern.prototype.mapping = null;
-    
+
       function Pattern(rawRegex, modifiers) {
         var _char, capturingBracketNumber, cleanedRegex, i, len, mapping, name, part, subChar;
         if (modifiers == null) {
@@ -1431,8 +1493,8 @@ function rando(){
         this.regex = new RegExp(this.cleanedRegex, 'g' + modifiers.replace('g', ''));
         this.mapping = mapping;
       }
-    
-      Pattern.prototype.exec = function(str) {
+
+      Pattern.prototype.exec = function (str) {
         var index, matches, name, ref;
         this.regex.lastIndex = 0;
         matches = this.regex.exec(str);
@@ -1448,18 +1510,18 @@ function rando(){
         }
         return matches;
       };
-    
-      Pattern.prototype.test = function(str) {
+
+      Pattern.prototype.test = function (str) {
         this.regex.lastIndex = 0;
         return this.regex.test(str);
       };
-    
-      Pattern.prototype.replace = function(str, replacement) {
+
+      Pattern.prototype.replace = function (str, replacement) {
         this.regex.lastIndex = 0;
         return str.replace(this.regex, replacement);
       };
-    
-      Pattern.prototype.replaceAll = function(str, replacement, limit) {
+
+      Pattern.prototype.replaceAll = function (str, replacement, limit) {
         var count;
         if (limit == null) {
           limit = 0;
@@ -1473,42 +1535,42 @@ function rando(){
         }
         return [str, count];
       };
-    
+
       return Pattern;
-    
+
     })();
-    
+
     module.exports = Pattern;
-    
-    
-    },{}],9:[function(require,module,exports){
+
+
+  }, {}], 9: [function (require, module, exports) {
     var Pattern, Unescaper, Utils;
-    
+
     Utils = require('./Utils');
-    
+
     Pattern = require('./Pattern');
-    
-    Unescaper = (function() {
-      function Unescaper() {}
-    
+
+    Unescaper = (function () {
+      function Unescaper() { }
+
       Unescaper.PATTERN_ESCAPED_CHARACTER = new Pattern('\\\\([0abt\tnvfre "\\/\\\\N_LP]|x[0-9a-fA-F]{2}|u[0-9a-fA-F]{4}|U[0-9a-fA-F]{8})');
-    
-      Unescaper.unescapeSingleQuotedString = function(value) {
+
+      Unescaper.unescapeSingleQuotedString = function (value) {
         return value.replace(/\'\'/g, '\'');
       };
-    
-      Unescaper.unescapeDoubleQuotedString = function(value) {
+
+      Unescaper.unescapeDoubleQuotedString = function (value) {
         if (this._unescapeCallback == null) {
-          this._unescapeCallback = (function(_this) {
-            return function(str) {
+          this._unescapeCallback = (function (_this) {
+            return function (str) {
               return _this.unescapeCharacter(str);
             };
           })(this);
         }
         return this.PATTERN_ESCAPED_CHARACTER.replace(value, this._unescapeCallback);
       };
-    
-      Unescaper.unescapeCharacter = function(value) {
+
+      Unescaper.unescapeCharacter = function (value) {
         var ch;
         ch = String.fromCharCode;
         switch (value.charAt(1)) {
@@ -1558,40 +1620,40 @@ function rando(){
             return '';
         }
       };
-    
+
       return Unescaper;
-    
+
     })();
-    
+
     module.exports = Unescaper;
-    
-    
-    },{"./Pattern":8,"./Utils":10}],10:[function(require,module,exports){
+
+
+  }, { "./Pattern": 8, "./Utils": 10 }], 10: [function (require, module, exports) {
     var Pattern, Utils,
       hasProp = {}.hasOwnProperty;
-    
+
     Pattern = require('./Pattern');
-    
-    Utils = (function() {
-      function Utils() {}
-    
+
+    Utils = (function () {
+      function Utils() { }
+
       Utils.REGEX_LEFT_TRIM_BY_CHAR = {};
-    
+
       Utils.REGEX_RIGHT_TRIM_BY_CHAR = {};
-    
+
       Utils.REGEX_SPACES = /\s+/g;
-    
+
       Utils.REGEX_DIGITS = /^\d+$/;
-    
+
       Utils.REGEX_OCTAL = /[^0-7]/gi;
-    
+
       Utils.REGEX_HEXADECIMAL = /[^a-f0-9]/gi;
-    
+
       Utils.PATTERN_DATE = new Pattern('^' + '(?<year>[0-9][0-9][0-9][0-9])' + '-(?<month>[0-9][0-9]?)' + '-(?<day>[0-9][0-9]?)' + '(?:(?:[Tt]|[ \t]+)' + '(?<hour>[0-9][0-9]?)' + ':(?<minute>[0-9][0-9])' + ':(?<second>[0-9][0-9])' + '(?:\.(?<fraction>[0-9]*))?' + '(?:[ \t]*(?<tz>Z|(?<tz_sign>[-+])(?<tz_hour>[0-9][0-9]?)' + '(?::(?<tz_minute>[0-9][0-9]))?))?)?' + '$', 'i');
-    
+
       Utils.LOCAL_TIMEZONE_OFFSET = new Date().getTimezoneOffset() * 60 * 1000;
-    
-      Utils.trim = function(str, _char) {
+
+      Utils.trim = function (str, _char) {
         var regexLeft, regexRight;
         if (_char == null) {
           _char = '\\s';
@@ -1608,8 +1670,8 @@ function rando(){
         regexRight.lastIndex = 0;
         return str.replace(regexLeft, '').replace(regexRight, '');
       };
-    
-      Utils.ltrim = function(str, _char) {
+
+      Utils.ltrim = function (str, _char) {
         var regexLeft;
         if (_char == null) {
           _char = '\\s';
@@ -1621,8 +1683,8 @@ function rando(){
         regexLeft.lastIndex = 0;
         return str.replace(regexLeft, '');
       };
-    
-      Utils.rtrim = function(str, _char) {
+
+      Utils.rtrim = function (str, _char) {
         var regexRight;
         if (_char == null) {
           _char = '\\s';
@@ -1634,14 +1696,14 @@ function rando(){
         regexRight.lastIndex = 0;
         return str.replace(regexRight, '');
       };
-    
-      Utils.isEmpty = function(value) {
+
+      Utils.isEmpty = function (value) {
         return !value || value === '' || value === '0' || (value instanceof Array && value.length === 0) || this.isEmptyObject(value);
       };
-    
-      Utils.isEmptyObject = function(value) {
+
+      Utils.isEmptyObject = function (value) {
         var k;
-        return value instanceof Object && ((function() {
+        return value instanceof Object && ((function () {
           var results;
           results = [];
           for (k in value) {
@@ -1651,8 +1713,8 @@ function rando(){
           return results;
         })()).length === 0;
       };
-    
-      Utils.subStrCount = function(string, subString, start, length) {
+
+      Utils.subStrCount = function (string, subString, start, length) {
         var c, i, j, len, ref, sublen;
         c = 0;
         string = '' + string;
@@ -1673,18 +1735,18 @@ function rando(){
         }
         return c;
       };
-    
-      Utils.isDigits = function(input) {
+
+      Utils.isDigits = function (input) {
         this.REGEX_DIGITS.lastIndex = 0;
         return this.REGEX_DIGITS.test(input);
       };
-    
-      Utils.octDec = function(input) {
+
+      Utils.octDec = function (input) {
         this.REGEX_OCTAL.lastIndex = 0;
         return parseInt((input + '').replace(this.REGEX_OCTAL, ''), 8);
       };
-    
-      Utils.hexDec = function(input) {
+
+      Utils.hexDec = function (input) {
         this.REGEX_HEXADECIMAL.lastIndex = 0;
         input = this.trim(input);
         if ((input + '').slice(0, 2) === '0x') {
@@ -1692,8 +1754,8 @@ function rando(){
         }
         return parseInt((input + '').replace(this.REGEX_HEXADECIMAL, ''), 16);
       };
-    
-      Utils.utf8chr = function(c) {
+
+      Utils.utf8chr = function (c) {
         var ch;
         ch = String.fromCharCode;
         if (0x80 > (c %= 0x200000)) {
@@ -1707,8 +1769,8 @@ function rando(){
         }
         return ch(0xF0 | c >> 18) + ch(0x80 | c >> 12 & 0x3F) + ch(0x80 | c >> 6 & 0x3F) + ch(0x80 | c & 0x3F);
       };
-    
-      Utils.parseBoolean = function(input, strict) {
+
+      Utils.parseBoolean = function (input, strict) {
         var lowerInput;
         if (strict == null) {
           strict = true;
@@ -1733,13 +1795,13 @@ function rando(){
         }
         return !!input;
       };
-    
-      Utils.isNumeric = function(input) {
+
+      Utils.isNumeric = function (input) {
         this.REGEX_SPACES.lastIndex = 0;
         return typeof input === 'number' || typeof input === 'string' && !isNaN(input) && input.replace(this.REGEX_SPACES, '') !== '';
       };
-    
-      Utils.stringToDate = function(str) {
+
+      Utils.stringToDate = function (str) {
         var date, day, fraction, hour, info, minute, month, second, tz_hour, tz_minute, tz_offset, year;
         if (!(str != null ? str.length : void 0)) {
           return null;
@@ -1785,8 +1847,8 @@ function rando(){
         }
         return date;
       };
-    
-      Utils.strRepeat = function(str, number) {
+
+      Utils.strRepeat = function (str, number) {
         var i, res;
         res = '';
         i = 0;
@@ -1796,8 +1858,8 @@ function rando(){
         }
         return res;
       };
-    
-      Utils.getStringFromFile = function(path, callback) {
+
+      Utils.getStringFromFile = function (path, callback) {
         var data, fs, j, len1, name, ref, req, xhr;
         if (callback == null) {
           callback = null;
@@ -1812,13 +1874,13 @@ function rando(){
               name = ref[j];
               try {
                 xhr = new ActiveXObject(name);
-              } catch (undefined) {}
+              } catch (undefined) { }
             }
           }
         }
         if (xhr != null) {
           if (callback != null) {
-            xhr.onreadystatechange = function() {
+            xhr.onreadystatechange = function () {
               if (xhr.readyState === 4) {
                 if (xhr.status === 200 || xhr.status === 0) {
                   return callback(xhr.responseText);
@@ -1841,7 +1903,7 @@ function rando(){
           req = require;
           fs = req('fs');
           if (callback != null) {
-            return fs.readFile(path, function(err, data) {
+            return fs.readFile(path, function (err, data) {
               if (err) {
                 return callback(null);
               } else {
@@ -1857,27 +1919,27 @@ function rando(){
           }
         }
       };
-    
+
       return Utils;
-    
+
     })();
-    
+
     module.exports = Utils;
-    
-    
-    },{"./Pattern":8}],11:[function(require,module,exports){
+
+
+  }, { "./Pattern": 8 }], 11: [function (require, module, exports) {
     var Dumper, Parser, Utils, Yaml;
-    
+
     Parser = require('./Parser');
-    
+
     Dumper = require('./Dumper');
-    
+
     Utils = require('./Utils');
-    
-    Yaml = (function() {
-      function Yaml() {}
-    
-      Yaml.parse = function(input, exceptionOnInvalidType, objectDecoder) {
+
+    Yaml = (function () {
+      function Yaml() { }
+
+      Yaml.parse = function (input, exceptionOnInvalidType, objectDecoder) {
         if (exceptionOnInvalidType == null) {
           exceptionOnInvalidType = false;
         }
@@ -1886,8 +1948,8 @@ function rando(){
         }
         return new Parser().parse(input, exceptionOnInvalidType, objectDecoder);
       };
-    
-      Yaml.parseFile = function(path, callback, exceptionOnInvalidType, objectDecoder) {
+
+      Yaml.parseFile = function (path, callback, exceptionOnInvalidType, objectDecoder) {
         var input;
         if (callback == null) {
           callback = null;
@@ -1899,8 +1961,8 @@ function rando(){
           objectDecoder = null;
         }
         if (callback != null) {
-          return Utils.getStringFromFile(path, (function(_this) {
-            return function(input) {
+          return Utils.getStringFromFile(path, (function (_this) {
+            return function (input) {
               var result;
               result = null;
               if (input != null) {
@@ -1917,8 +1979,8 @@ function rando(){
           return null;
         }
       };
-    
-      Yaml.dump = function(input, inline, indent, exceptionOnInvalidType, objectEncoder) {
+
+      Yaml.dump = function (input, inline, indent, exceptionOnInvalidType, objectEncoder) {
         var yaml;
         if (inline == null) {
           inline = 2;
@@ -1936,28 +1998,29 @@ function rando(){
         yaml.indentation = indent;
         return yaml.dump(input, inline, 0, exceptionOnInvalidType, objectEncoder);
       };
-    
-      Yaml.stringify = function(input, inline, indent, exceptionOnInvalidType, objectEncoder) {
+
+      Yaml.stringify = function (input, inline, indent, exceptionOnInvalidType, objectEncoder) {
         return this.dump(input, inline, indent, exceptionOnInvalidType, objectEncoder);
       };
-    
-      Yaml.load = function(path, callback, exceptionOnInvalidType, objectDecoder) {
+
+      Yaml.load = function (path, callback, exceptionOnInvalidType, objectDecoder) {
         return this.parseFile(path, callback, exceptionOnInvalidType, objectDecoder);
       };
-    
+
       return Yaml;
-    
+
     })();
-    
+
     if (typeof window !== "undefined" && window !== null) {
       window.YAML = Yaml;
     }
-    
+
     if (typeof window === "undefined" || window === null) {
       this.YAML = Yaml;
     }
-    
+
     module.exports = Yaml;
-    
-    
-    },{"./Dumper":1,"./Parser":7,"./Utils":10}]},{},[11]);
+
+
+  }, { "./Dumper": 1, "./Parser": 7, "./Utils": 10 }]
+}, {}, [11]);
