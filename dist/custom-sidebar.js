@@ -1,23 +1,23 @@
 console.log("Custom Sidebar is loading");
 
-var hacky_hackerson = setInterval(rearrange, 1000 / 60);
-var loaded = false; 
+var Hacky_Hackerson = setInterval(rearrange, 1000 / 60);
+var Loaded = false; 
 
 function rearrange() {
     let root = getSidebar();
-    if (root && !loaded) {
-        loaded = true;
+    if (root && !Loaded) {
+        Loaded = true;
         var req = new XMLHttpRequest();
         req.onload = function () {
             var config = YAML.parse(this.responseText);
             for (var i = config.order.length - 1; i >= 0; i--) {
-                move_item(root, config.order[i].item.toLowerCase(), config.order[i].bottom, config.order[i].hide);
+                moveItem(root, config.order[i].item.toLowerCase(), config.order[i].bottom, config.order[i].hide);
             }
-            clearInterval(hacky_hackerson)
+            clearInterval(Hacky_Hackerson)
             console.log("Custom Sidebar is loaded");
         };
         req.onerror = function(){
-            clearInterval(hacky_hackerson);
+            clearInterval(Hacky_Hackerson);
         }
         req.open('GET', window.location.origin + "/local/sidebar-order.yaml?rnd=" + rando());
         req.send();
@@ -36,7 +36,7 @@ function getSidebar() {
     return root;
 }
 
-function move_item(elements, name, after_space, hide) {
+function moveItem(elements, name, after_space, hide) {
   for (var i = 0; i < elements.children.length; i++) {
     if (elements.children[i].tagName == "A") {
       var current = elements.children[i].children[0].getElementsByTagName('span')[0].innerHTML;
