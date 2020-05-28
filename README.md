@@ -4,6 +4,10 @@ This is an extra module for [Home Assistant Frontend](https://www.home-assistant
 
 This plugin allows you to rearrange items in the Home Assistant sidebar. (Overview, Map, History, etc)
 
+Before                     |           After
+:-------------------------:|:-------------------------:
+![](https://raw.githubusercontent.com/Villhellm/README_images/master/sidebar-before-example.png)  |  ![](https://raw.githubusercontent.com/Villhellm/README_images/master/sidebar-example.png)
+
 ## HACS Installation and Configuration
 
 ### Step 1
