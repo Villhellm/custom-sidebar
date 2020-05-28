@@ -20,7 +20,7 @@ Ex:
 ```yaml
 frontend:
   extra_module_url:
-    - /local/custom-sidebar.js
+    - /hacsfiles/custom-sidebar/custom-sidebar.js
 ```
 
 ### Step 3
