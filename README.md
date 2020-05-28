@@ -4,7 +4,45 @@ This is an extra module for [Home Assistant Frontend](https://www.home-assistant
 
 This plugin allows you to rearrange items in the Home Assistant sidebar. (Overview, Map, History, etc)
 
-## Installation
+## HACS Installation and Configuration
+
+### Step 1
+
+Install Custom Sidebar plugin with HACS
+
+### Step 2
+
+By default this will only function if you load into a Lovelace view. To make sure this plugin works all the time make sure to follow the instructions all the way through.
+
+To load the module into your instance you will need to add it to the frontend configuration in configuration.yaml.
+
+Ex:
+```yaml
+frontend:
+  extra_module_url:
+    - /local/custom-sidebar.js
+```
+
+### Step 3
+
+The order configuration must be stored in `<config directory>/www/sidebar-order.yaml`. You will create this file yourself. All items will be under the root `order:`.
+They will be arranged in order from top to bottom.
+
+Ex:
+```yaml
+order:
+  - item: map
+    hide: true
+  - item: developer tools
+    href: /developer-tools/state
+  - item: overview
+  - item: history
+    bottom: true
+  - item: logbook
+    bottom: true
+```
+
+## Manual Installation and Configuration
 
 ### Step 1
 
