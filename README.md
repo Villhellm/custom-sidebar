@@ -32,6 +32,7 @@ order:
   - item: map
     hide: true
   - item: developer tools
+    href: /developer-tools/state
   - item: overview
   - item: history
     bottom: true
@@ -52,6 +53,7 @@ order:
 | item | string | **Required** | This is a string that will be checked for in the display name of the sidebar item. It can be a substring such as `developer` instead of `Developer Tools`. It is not case sensitive.
 | bottom | boolean | **Optional** | Setting this option to `true` will group the item with the bottom items (Configuration, Developer Tools, etc) instead of at the top.
 | hide | boolean | **Optional** | Hide item in sidebar.
+| href | string | **Optional** | Define the href for the sidebar link.
 
 ## Exceptions
 Exceptions can be used if you would like to define an order for a specific user/device.
@@ -71,6 +73,7 @@ order:
   - item: map
     hide: true
   - item: developer tools
+    href: /developer-tools/state
   - item: overview
   - item: history
     bottom: true

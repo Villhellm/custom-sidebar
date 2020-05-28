@@ -60,7 +60,7 @@ function Current_Order(config) {
 
 function rearrange(order){
   for (var i = order.length - 1; i >= 0; i--) {
-    moveItem(Root, order[i].item.toLowerCase(), order[i].bottom, order[i].hide);
+    moveItem(Root, order[i].item.toLowerCase(), order[i].bottom, order[i].hide, order[i].href);
   }
 }
 
@@ -96,11 +96,14 @@ function getSidebar() {
   return root;
 }
 
-function moveItem(elements, name, after_space, hide) {
+function moveItem(elements, name, after_space, hide, href) {
   for (var i = 0; i < elements.children.length; i++) {
     if (elements.children[i].tagName == "A") {
       var current = elements.children[i].children[0].getElementsByTagName('span')[0].innerHTML;
       if (current.toLowerCase().includes(name)) {
+        if(href){
+          elements.children[i].href = href;
+        }
         if (hide == true) {
           elements.children[i].style.display = "none";
         }
