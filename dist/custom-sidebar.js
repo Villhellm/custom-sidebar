@@ -60,6 +60,11 @@ function Current_Order(config) {
 
 function rearrange(order){
   for (var i = order.length - 1; i >= 0; i--) {
+    if(order[i].new_item == true){
+      createItem(Root,order[i]);
+    }
+  }
+  for (var i = order.length - 1; i >= 0; i--) {
     moveItem(Root, order[i].item.toLowerCase(), order[i].bottom, order[i].hide, order[i].href);
   }
 }
@@ -94,6 +99,15 @@ function getSidebar() {
   root = root && root.shadowRoot;
   root = root && root.querySelector("paper-listbox");
   return root;
+}
+function createItem(elements, item) {
+  var cln = elements.children[elements.children.length - 1].cloneNode(true);
+
+  cln.querySelector("paper-icon-item").querySelector("ha-icon").setAttribute("icon", item.icon);
+  cln.querySelector("paper-icon-item").querySelector("span").innerHTML = item.item;
+  cln.href = item.href;
+  cln.setAttribute("data-panel", item.item);
+  elements.insertBefore(cln, elements.children[0]);
 }
 
 function moveItem(elements, name, after_space, hide, href) {

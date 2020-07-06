@@ -80,6 +80,11 @@ order:
     bottom: true
   - item: logbook
     bottom: true
+  - new_item: true
+    item: Server Controls
+    href: /config/server_control
+    icon: "mdi:server"
+    bottom: true
 ```
 
 ## Order
@@ -96,6 +101,8 @@ order:
 | bottom | boolean | **Optional** | Setting this option to `true` will group the item with the bottom items (Configuration, Developer Tools, etc) instead of at the top.
 | hide | boolean | **Optional** | Hide item in sidebar.
 | href | string | **Optional** | Define the href for the sidebar link.
+| new_item | boolean | **Optional** | Set to true to create a new link in the sidebar. Using this option now makes `item`, `href`, and `icon` required.
+| icon | string | **Optional** | Only used with `new_item`.
 
 ## Exceptions
 Exceptions can be used if you would like to define an order for a specific user/device.
@@ -120,6 +127,11 @@ order:
   - item: history
     bottom: true
   - item: logbook
+    bottom: true
+  - new_item: true
+    item: Server Controls
+    href: /config/server_control
+    icon: "mdi:server"
     bottom: true
 exceptions:
   - user: will
