@@ -101,13 +101,26 @@ function getSidebar() {
   return root;
 }
 function createItem(elements, item) {
-  var cln = elements.children[elements.children.length - 1].cloneNode(true);
+  var cln = getConfigurationElement(elements).cloneNode(true);
+  if(cln){
+    cln.querySelector("paper-icon-item").querySelector("ha-icon").setAttribute("icon", item.icon);
+    cln.querySelector("paper-icon-item").querySelector("span").innerHTML = item.item;
+    cln.href = item.href;
+    cln.setAttribute("data-panel", item.item);
+    elements.insertBefore(cln, elements.children[0]);
+  }
+}
 
-  cln.querySelector("paper-icon-item").querySelector("ha-icon").setAttribute("icon", item.icon);
-  cln.querySelector("paper-icon-item").querySelector("span").innerHTML = item.item;
-  cln.href = item.href;
-  cln.setAttribute("data-panel", item.item);
-  elements.insertBefore(cln, elements.children[0]);
+function getConfigurationElement(elements){
+  for (var i = 0; i < elements.children.length; i++) {
+    if (elements.children[i].tagName == "A") {
+      var current = elements.children[i].children[0].getElementsByTagName('span')[0].innerHTML;
+      if (current == "<!---->Configuration<!---->") {
+        console.log(elements.children[i]);
+        return elements.children[i];
+      }
+    }
+  }
 }
 
 function moveItem(elements, name, after_space, hide, href) {
