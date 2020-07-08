@@ -65,7 +65,7 @@ function rearrange(order){
     }
   }
   for (var i = order.length - 1; i >= 0; i--) {
-    moveItem(Root, order[i].item.toLowerCase(), order[i].bottom, order[i].hide, order[i].href);
+    moveItem(Root, order[i].item.toLowerCase(), order[i].bottom, order[i].hide, order[i].href, order[i]);
   }
 }
 
@@ -83,7 +83,7 @@ function run() {
     req.onerror = function () {
       clearInterval(Hacky_Hackerson);
     }
-    req.open('GET', "/local/sidebar-order.yaml?rnd=" + rando());
+    req.open("GET", "/local/sidebar-order.yaml?rnd=" + rando());
     req.send();
   }
 }
@@ -114,7 +114,7 @@ function createItem(elements, item) {
 function getConfigurationElement(elements){
   for (var i = 0; i < elements.children.length; i++) {
     if (elements.children[i].tagName == "A") {
-      var current = elements.children[i].children[0].getElementsByTagName('span')[0].innerHTML;
+      var current = elements.children[i].children[0].getElementsByTagName("span")[0].innerHTML;
       if (current == "<!---->Configuration<!---->") {
         console.log(elements.children[i]);
         return elements.children[i];
@@ -123,13 +123,32 @@ function getConfigurationElement(elements){
   }
 }
 
-function moveItem(elements, name, after_space, hide, href) {
+function moveItem(elements, name, after_space, hide, href, config_entry) {
   for (var i = 0; i < elements.children.length; i++) {
     if (elements.children[i].tagName == "A") {
-      var current = elements.children[i].children[0].getElementsByTagName('span')[0].innerHTML;
+      var current = elements.children[i].children[0].getElementsByTagName("span")[0].innerHTML;
       if (current.toLowerCase().includes(name)) {
         if(href){
           elements.children[i].href = href;
+        }
+        if(config_entry.icon){
+          console.log(elements.children[i]);
+          var icon_holder = elements.children[i].querySelector("ha-icon");
+          if(icon_holder){
+            icon_holder.setAttribute("icon", config_entry.icon);
+          }
+          else{
+            var old_icon = elements.children[i].querySelector("ha-svg-icon");
+            if(old_icon){
+              var icon_item = elements.children[i].querySelector("paper-icon-item");
+              icon_item.removeChild(old_icon);
+              icon_holder = document.createElement("ha-icon");
+              icon_holder.setAttribute("slot", "item-icon");
+              icon_holder.setAttribute("icon", config_entry.icon);
+              icon_item.prepend(icon_holder);
+            }
+          }
+          console.log("test");
         }
         if (hide == true) {
           elements.children[i].style.display = "none";
