@@ -155,7 +155,6 @@ function moveItem(elements, config_entry) {
               icon_item.prepend(icon_holder);
             }
           }
-          console.log("test");
         }
         if (config_entry.hide == true) {
           elements.children[i].style.display = "none";
