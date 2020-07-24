@@ -117,7 +117,6 @@ function getConfigurationElement(elements) {
     if (elements.children[i].tagName == "A") {
       var current = elements.children[i].children[0].getElementsByTagName("span")[0].innerHTML;
       if (current == "<!---->Configuration<!---->") {
-        console.log(elements.children[i]);
         return elements.children[i];
       }
     }
@@ -127,7 +126,7 @@ function getConfigurationElement(elements) {
 function moveItem(elements, config_entry) {
   for (var i = 0; i < elements.children.length; i++) {
     if (elements.children[i].tagName == "A") {
-      var current = elements.children[i].children[0].getElementsByTagName("span")[0].innerHTML;
+      var current = elements.children[i].children[0].getElementsByTagName("span")[0].innerHTML.replace('<!---->','').replace('<!---->','');
       var match = false;
       if (config_entry.exact) {
         match = current == config_entry.item;
@@ -140,7 +139,6 @@ function moveItem(elements, config_entry) {
           elements.children[i].href = config_entry.href;
         }
         if (config_entry.icon) {
-          console.log(elements.children[i]);
           var icon_holder = elements.children[i].querySelector("ha-icon");
           if (icon_holder) {
             icon_holder.setAttribute("icon", config_entry.icon);
