@@ -17,25 +17,67 @@ function Current_Order(config) {
         var current_environment_enabled = true;
         var current_exception_keys = Object.keys(current_exception);
         for (var x = 0; x < current_exception_keys.length; x++) {
+          console.log(navigator.userAgent);
           switch (current_exception_keys[x]) {
             case "user":
-              if (current_exception.user.toLowerCase() != Haobj.user.name.toLowerCase()) {
-                current_environment_enabled = false;
+              if(current_exception.user.includes(',')){
+                current_exception.user = current_exception.user.replace(/, /g, ',').split(',');
+              }
+              if (current_exception.user instanceof Array) {
+                current_environment_enabled = current_exception.user.map(x => x.toLowerCase()).some(x => x == Haobj.user.name.toLowerCase());
+              }
+              else {
+                if (current_exception.user.toLowerCase() != Haobj.user.name.toLowerCase()) {
+                  current_environment_enabled = false;
+                }
               }
               break;
             case "device":
-              if (!navigator.userAgent.toLowerCase().includes(current_exception.device.toLowerCase())) {
+              if(current_exception.device.includes(',')){
+                current_exception.device = current_exception.device.replace(/, /g, ',').split(',');
+              }
+              if (current_exception.device instanceof Array) {
                 current_environment_enabled = false;
+                current_exception.device.forEach(device=>{
+                  if (navigator.userAgent.toLowerCase().includes(device.toLowerCase())) {
+                    current_environment_enabled = true;
+                  }
+                });
+              }
+              else {
+                if (!navigator.userAgent.toLowerCase().includes(current_exception.device.toLowerCase())) {
+                  current_environment_enabled = false;
+                }
               }
               break;
             case "not_user":
-              if (current_exception.not_user.toLowerCase() == Haobj.user.name.toLowerCase()) {
-                current_environment_enabled = false;
+              if(current_exception.not_user.includes(',')){
+                current_exception.not_user = current_exception.not_user.replace(/, /g, ',').split(',');
+              }
+              if (current_exception.not_user instanceof Array) {
+                current_environment_enabled = !current_exception.not_user.map(x => x.toLowerCase()).some(x => x == Haobj.user.name.toLowerCase());
+              }
+              else {
+                if (current_exception.not_user.toLowerCase() == Haobj.user.name.toLowerCase()) {
+                  current_environment_enabled = false;
+                }
               }
               break;
             case "not_device":
-              if (navigator.userAgent.toLowerCase().includes(current_exception.not_device.toLowerCase())) {
-                current_environment_enabled = false;
+              if(current_exception.not_device.includes(',')){
+                current_exception.not_device = current_exception.not_device.replace(/, /g, ',').split(',');
+              }
+              if (current_exception.not_device instanceof Array) {
+                current_exception.not_device.forEach(not_device=>{
+                  if (navigator.userAgent.toLowerCase().includes(not_device.toLowerCase())) {
+                    current_environment_enabled = false;
+                  }
+                });
+              }
+              else {
+                if (navigator.userAgent.toLowerCase().includes(current_exception.not_device.toLowerCase())) {
+                  current_environment_enabled = false;
+                }
               }
               break;
           }
@@ -126,7 +168,7 @@ function getConfigurationElement(elements) {
 function moveItem(elements, config_entry) {
   for (var i = 0; i < elements.children.length; i++) {
     if (elements.children[i].tagName == "A") {
-      var current = elements.children[i].children[0].getElementsByTagName("span")[0].innerHTML.replace('<!---->','').replace('<!---->','');
+      var current = elements.children[i].children[0].getElementsByTagName("span")[0].innerHTML.replace('<!---->', '').replace('<!---->', '');
       var match = false;
       if (config_entry.exact) {
         match = current == config_entry.item;
@@ -139,8 +181,8 @@ function moveItem(elements, config_entry) {
           elements.children[i].href = config_entry.href;
         }
 
-        if(config_entry.name){
-          elements.children[i].children[0].getElementsByTagName("span")[0].innerHTML = elements.children[i].children[0].getElementsByTagName("span")[0].innerHTML.replace(current,config_entry.name);
+        if (config_entry.name) {
+          elements.children[i].children[0].getElementsByTagName("span")[0].innerHTML = elements.children[i].children[0].getElementsByTagName("span")[0].innerHTML.replace(current, config_entry.name);
         }
 
         if (config_entry.icon) {
@@ -213,7 +255,7 @@ function rando() {
     Inline = require('./Inline');
 
     Dumper = (function () {
-      function Dumper() {}
+      function Dumper() { }
 
       Dumper.indentation = 4;
 
@@ -275,7 +317,7 @@ function rando() {
     Escaper = (function () {
       var ch;
 
-      function Escaper() {}
+      function Escaper() { }
 
       Escaper.LIST_ESCAPEES = ['\\', '\\\\', '\\"', '"', "\x00", "\x01", "\x02", "\x03", "\x04", "\x05", "\x06", "\x07", "\x08", "\x09", "\x0a", "\x0b", "\x0c", "\x0d", "\x0e", "\x0f", "\x10", "\x11", "\x12", "\x13", "\x14", "\x15", "\x16", "\x17", "\x18", "\x19", "\x1a", "\x1b", "\x1c", "\x1d", "\x1e", "\x1f", (ch = String.fromCharCode)(0x0085), ch(0x00A0), ch(0x2028), ch(0x2029)];
 
@@ -481,7 +523,7 @@ function rando() {
     DumpException = require('./Exception/DumpException');
 
     Inline = (function () {
-      function Inline() {}
+      function Inline() { }
 
       Inline.REGEX_QUOTED_STRING = '(?:"(?:[^"\\\\]*(?:\\\\.[^"\\\\]*)*)"|\'(?:[^\']*(?:\'\'[^\']*)*)\')';
 
@@ -1700,7 +1742,7 @@ function rando() {
     Pattern = require('./Pattern');
 
     Unescaper = (function () {
-      function Unescaper() {}
+      function Unescaper() { }
 
       Unescaper.PATTERN_ESCAPED_CHARACTER = new Pattern('\\\\([0abt\tnvfre "\\/\\\\N_LP]|x[0-9a-fA-F]{2}|u[0-9a-fA-F]{4}|U[0-9a-fA-F]{8})');
 
@@ -1788,7 +1830,7 @@ function rando() {
     Pattern = require('./Pattern');
 
     Utils = (function () {
-      function Utils() {}
+      function Utils() { }
 
       Utils.REGEX_LEFT_TRIM_BY_CHAR = {};
 
@@ -2027,7 +2069,7 @@ function rando() {
               name = ref[j];
               try {
                 xhr = new ActiveXObject(name);
-              } catch (undefined) {}
+              } catch (undefined) { }
             }
           }
         }
@@ -2093,7 +2135,7 @@ function rando() {
     Utils = require('./Utils');
 
     Yaml = (function () {
-      function Yaml() {}
+      function Yaml() { }
 
       Yaml.parse = function (input, exceptionOnInvalidType, objectDecoder) {
         if (exceptionOnInvalidType == null) {

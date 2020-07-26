@@ -112,10 +112,10 @@ Exceptions can be used if you would like to define an order for a specific user/
 | Name | Type | Requirement | Description
 | ---- | ---- | ------- | -----------
 | base_order | bool | **Optional** | If true this will run rearrangement for your base order configuration before running this exception. Default is false.
-| user | string | **Optional** | Home Assistant user name you would like to display this order for.
-| device | string | **Optional** | Type of device you would like to display this order for. ex: ipad, iphone, macintosh, windows, android
-| not_user | string | **Optional** | Every Home Assistant user name *except* this user name.
-| not_device | string | **Optional** | Every device *except* this device. ex: ipad, iphone, macintosh, windows, android
+| user | string, list | **Optional** | Home Assistant user name you would like to display this order for.
+| device | string, list | **Optional** | Type of device you would like to display this order for. ex: ipad, iphone, macintosh, windows, android
+| not_user | string, list | **Optional** | Every Home Assistant user name *except* this user name.
+| not_device | string, list | **Optional** | Every device *except* this device. ex: ipad, iphone, macintosh, windows, android
 | order | [order](#order) | **Required** | Define and order. 
 
 Ex sidebar-order.yaml using exceptions:
@@ -141,7 +141,7 @@ exceptions:
     order:
       - item: map
         hide: false
-      - item: developer_tools
+      - item: developer tools
         hide: true
 
 ```
