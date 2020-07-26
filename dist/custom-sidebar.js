@@ -138,6 +138,11 @@ function moveItem(elements, config_entry) {
         if (config_entry.href) {
           elements.children[i].href = config_entry.href;
         }
+
+        if(config_entry.name){
+          elements.children[i].children[0].getElementsByTagName("span")[0].innerHTML = elements.children[i].children[0].getElementsByTagName("span")[0].innerHTML.replace(current,config_entry.name);
+        }
+
         if (config_entry.icon) {
           var icon_holder = elements.children[i].querySelector("ha-icon");
           if (icon_holder) {
