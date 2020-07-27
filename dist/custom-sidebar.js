@@ -157,8 +157,8 @@ function createItem(elements, item) {
 function getConfigurationElement(elements) {
   for (var i = 0; i < elements.children.length; i++) {
     if (elements.children[i].tagName == "A") {
-      var current = elements.children[i].children[0].getElementsByTagName("span")[0].innerHTML;
-      if (current == "<!---->Configuration<!---->") {
+      var current = elements.children[i].getAttribute("data-panel");
+      if (current == "config") {
         return elements.children[i];
       }
     }
