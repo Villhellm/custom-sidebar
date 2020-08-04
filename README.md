@@ -2,7 +2,7 @@
 
 This is an extra module for [Home Assistant Frontend](https://www.home-assistant.io/integrations/frontend/#extra_module_url) on [Home Assistant](https://www.home-assistant.io/)
 
-This plugin allows you to rearrange items in the Home Assistant sidebar. (Overview, Map, History, etc)
+This plugin allows you to rearrange, hide, and add items in the Home Assistant sidebar. (Overview, Map, History, etc)
 
 Before                     |           After
 :-------------------------:|:-------------------------:
