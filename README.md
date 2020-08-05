@@ -20,6 +20,8 @@ By default this will only function if you load into a Lovelace view. To make sur
 
 To load the module into your instance you will need to add it to the frontend configuration in configuration.yaml.
 
+NOTE: If you have [browser_mod](https://github.com/thomasloven/hass-browser_mod) installed then this step is unnecessary. Browser__mod loads all Lovelace resources globally by default.
+
 Ex:
 ```yaml
 frontend:
