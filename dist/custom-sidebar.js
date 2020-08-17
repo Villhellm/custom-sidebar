@@ -101,13 +101,15 @@ function Current_Order(config) {
 }
 
 function rearrange(order) {
-  for (var i = order.length - 1; i >= 0; i--) {
-    if (order[i].new_item == true) {
-      createItem(Root, order[i]);
+  if (order) {
+    for (var i = order.length - 1; i >= 0; i--) {
+      if (order[i].new_item == true) {
+        createItem(Root, order[i]);
+      }
     }
-  }
-  for (var i = order.length - 1; i >= 0; i--) {
-    moveItem(Root, order[i]);
+    for (var i = order.length - 1; i >= 0; i--) {
+      moveItem(Root, order[i]);
+    }
   }
 }
 
