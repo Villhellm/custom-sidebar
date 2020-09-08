@@ -89,6 +89,11 @@ order:
     bottom: true
 ```
 
+## Title
+| Name | Type | Requirement | Description
+| ---- | ---- | ------- | -----------
+| title | string | **Optional** | Change the default title over the sidebar
+
 ## Order
 
 | Name | Type | Requirement | Description
@@ -120,8 +125,10 @@ Exceptions can be used if you would like to define an order for a specific user/
 | not_device | string, list | **Optional** | Every device *except* this device. ex: ipad, iphone, macintosh, windows, android
 | order | [order](#order) | **Required** | Define and order. 
 
+
 Ex sidebar-order.yaml using exceptions:
 ```yaml
+title: Hass
 order:
   - item: map
     hide: true

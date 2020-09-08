@@ -4,10 +4,14 @@ var Hacky_Hackerson = setInterval(run, 1000 / 60);
 var Loaded = false;
 var Haobj = null;
 var Root = null;
+var TitleElement = null;
 
 function Current_Order(config) {
   var return_order = null;
   if (config) {
+    if(config.title){
+      setTitle(config.title);
+    }
     if (config.order) {
       return_order = config.order;
     }
@@ -113,6 +117,12 @@ function rearrange(order) {
   }
 }
 
+function setTitle(title){
+  if(TitleElement){
+    TitleElement.innerHTML = title;
+  }
+}
+
 function run() {
   Root = getSidebar();
   if (Root && !Loaded) {
@@ -141,6 +151,7 @@ function getSidebar() {
   root = root && root.querySelector("app-drawer-layout app-drawer");
   root = root && root.querySelector("ha-sidebar");
   root = root && root.shadowRoot;
+  TitleElement = root.querySelector('span');
   root = root && root.querySelector("paper-listbox");
   return root;
 }
