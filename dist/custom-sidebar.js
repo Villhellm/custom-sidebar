@@ -151,7 +151,7 @@ function getSidebar() {
   root = root && root.querySelector("app-drawer-layout app-drawer");
   root = root && root.querySelector("ha-sidebar");
   root = root && root.shadowRoot;
-  TitleElement = root && root.querySelector('span') ? root.querySelector('span') : null ;
+  TitleElement = root && root.querySelector('.title') ? root.querySelector('.title') : null ;
   root = root && root.querySelector("paper-listbox");
   return root;
 }
