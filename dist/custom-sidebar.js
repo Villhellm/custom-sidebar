@@ -157,7 +157,9 @@ function getSidebar() {
 }
 
 function createItem(elements, item) {
-  var cln = getConfigurationElement(elements).cloneNode(true);
+  var cln = null;
+  if (getConfigurationElement(elements))
+     cln = getConfigurationElement(elements).cloneNode(true);
   if (cln) {
     cln.querySelector("paper-icon-item").querySelector("ha-icon").setAttribute("icon", item.icon);
     cln.querySelector("paper-icon-item").querySelector("span").innerHTML = item.item;
