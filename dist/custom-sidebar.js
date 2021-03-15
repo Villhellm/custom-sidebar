@@ -162,6 +162,9 @@ function createItem(elements, item) {
     cln.querySelector("paper-icon-item").querySelector("ha-icon").setAttribute("icon", item.icon);
     cln.querySelector("paper-icon-item").querySelector("span").innerHTML = item.item;
     cln.href = item.href;
+    if (item.open_new == true) {
+      cln.setAttribute("target", "_blank");
+    }
     cln.setAttribute("data-panel", item.item);
     elements.insertBefore(cln, elements.children[0]);
   }
