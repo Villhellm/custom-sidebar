@@ -197,7 +197,7 @@ function moveItem(elements, config_entry) {
           elements.children[i].href = config_entry.href;
         }
         
-        if (config_entry.open_nef) {
+        if (config_entry.open_new) {
           elements.children[i].setAttribute("target", "_blank");
         }
 
