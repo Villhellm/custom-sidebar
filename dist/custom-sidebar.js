@@ -181,7 +181,7 @@ function getConfigurationElement(elements) {
 function moveItem(elements, config_entry) {
   for (var i = 0; i < elements.children.length; i++) {
     if (elements.children[i].tagName == "A") {
-      var current = elements.children[i].children[0].getElementsByTagName("span")[0].innerHTML.replace('<!---->', '').replace('<!---->', '');
+      var current = elements.children[i].children[0].getElementsByTagName("span")[0].textContent;
       var match = false;
       if (config_entry.exact) {
         match = current == config_entry.item;
